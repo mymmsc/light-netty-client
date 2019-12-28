@@ -1,6 +1,5 @@
 package org.hotwheel.rpc1x.core;
 
-import org.hotwheel.rpc1x.util.CompileOptions;
 import org.hotwheel.rpc1x.handler.AdditionalChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -63,8 +62,7 @@ public final class ClientConfig {
         return this;
     }
 
-    public ClientConfig additionalChannelInitializer(
-            AdditionalChannelInitializer additionalChannelInitializer) {
+    public ClientConfig additionalChannelInitializer(AdditionalChannelInitializer additionalChannelInitializer) {
         this.additionalChannelInitializer = additionalChannelInitializer;
         return this;
     }

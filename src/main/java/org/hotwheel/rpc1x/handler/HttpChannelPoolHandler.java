@@ -13,15 +13,15 @@ import io.netty.handler.timeout.IdleStateEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObject> {
-    private static final Logger logger = Logger.getLogger(NettyChannelPoolHandler.class.getName());
+public class HttpChannelPoolHandler extends SimpleChannelInboundHandler<HttpObject> {
+    private static final Logger logger = Logger.getLogger(HttpChannelPoolHandler.class.getName());
 
     private NettyChannelPool channelPool;
 
     /**
      * @param channelPool
      */
-    public NettyChannelPoolHandler(NettyChannelPool channelPool) {
+    public HttpChannelPoolHandler(NettyChannelPool channelPool) {
         super();
         this.channelPool = channelPool;
     }

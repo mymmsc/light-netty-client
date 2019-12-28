@@ -10,14 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NettyHttpRequest extends RpcRequest {
-
     private URI uri;
-
     private Map<String, Object> headers;
-
     private ByteBuf content;
-
-    private static final Charset DEFAUT_CHARSET = Charset.forName("GBK");
 
     public NettyHttpRequest uri(String uri) {
         this.uri = URI.create(uri);

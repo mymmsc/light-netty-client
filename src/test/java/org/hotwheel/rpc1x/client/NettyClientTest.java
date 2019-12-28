@@ -16,6 +16,7 @@
 package org.hotwheel.rpc1x.client;
 
 import org.hotwheel.rpc1x.core.ClientConfig;
+import org.hotwheel.rpc1x.core.ResponseBuilder;
 import org.hotwheel.rpc1x.core.RpcResponseFuture;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpResponse;
@@ -31,9 +32,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-/**
- * @author xianwu.zhang
- */
 public class NettyClientTest {
     private ClientConfig config;
 
@@ -51,7 +49,12 @@ public class NettyClientTest {
     @Test
     public void testGet() throws Exception {
         final String url = "http://www.baidu.com:80";
-
+        ResponseBuilder<NettyHttpResponse> responseBuilder = new ResponseBuilder<NettyHttpResponse>() {
+            @Override
+            public NettyHttpResponse build() {
+                return new NettyHttpResponse();
+            }
+        };
         final NettyHttpClient client = new NettyHttpClient(config);
 
         final NettyHttpRequest request = new NettyHttpRequest();

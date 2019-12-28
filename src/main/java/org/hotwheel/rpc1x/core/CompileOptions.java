@@ -1,4 +1,4 @@
-package org.hotwheel.rpc1x.util;
+package org.hotwheel.rpc1x.core;
 
 /**
  * Java 编译选项
