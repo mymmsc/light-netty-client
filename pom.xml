@@ -10,7 +10,7 @@
 
 	<properties>
 		<java.encoding>UTF-8</java.encoding>
-		<jdk.version>1.6</jdk.version>
+		<jdk.version>1.8</jdk.version>
 	</properties>
 
 	<developers>
@@ -18,6 +18,11 @@
 			<id>jason</id>
 			<name>jason</name>
 			<email>xw_znwpu@163.com</email>
+		</developer>
+		<developer>
+			<id>wangfeng</id>
+			<name>wangfeng</name>
+			<email>wangfengxy@sina.cn</email>
 		</developer>
 	</developers>
 
@@ -72,7 +77,6 @@
 			<version>4.1.39.Final</version>
 			<scope>compile</scope>
 		</dependency>
-		
 
 		<dependency>
 			<groupId>junit</groupId>
