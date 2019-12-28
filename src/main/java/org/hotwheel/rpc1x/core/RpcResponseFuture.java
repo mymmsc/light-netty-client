@@ -27,7 +27,7 @@ public class RpcResponseFuture<T extends RpcResponse>/* implements Future<T>*/ {
             return false;
         }
 
-        responseBuilder = new ResponseBuilder<>();
+        responseBuilder = new NettyHttpResponseBuilder();
         responseBuilder.setSuccess(false);
         responseBuilder.setCause(cause);
         isCancel = true;

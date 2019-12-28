@@ -2,9 +2,6 @@ package org.hotwheel.rpc1x.core;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponse;
-import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
-import org.hotwheel.rpc1x.protocol.http.NettyHttpResponse;
-import org.hotwheel.rpc1x.protocol.http.NettyHttpResponseBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,26 +10,12 @@ import java.util.List;
  * @author wangfeng
  * @date 2019-12-28
  */
-public class ResponseBuilder<T extends RpcResponse> implements RpcBuilder<T>{
+public abstract class ResponseBuilder<T extends RpcResponse> implements RpcBuilder<T> {
     private volatile Throwable cause;
     private volatile boolean success = false;
     private volatile List<ByteBuf> pendingContents;
     private volatile HttpResponse pendingResponse;
 
-    @Override
-    public T build() {
-        return null;
-    }
-
-/*
-    public ResponseBuilder<NettyHttpResponse> getResponseBuilder() {
-        return responseBuilder;
-    }
-
-    public void setResponseBuilder(NettyHttpResponseBuilder responseBuilder) {
-        this.responseBuilder = responseBuilder;
-    }
-*/
     /**
      * Getter method for property <tt>cause</tt>.
      *
