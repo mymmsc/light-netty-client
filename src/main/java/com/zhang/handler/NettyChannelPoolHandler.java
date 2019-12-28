@@ -15,6 +15,8 @@
  */
 package com.zhang.handler;
 
+import com.zhang.pool.NettyChannelPool;
+import com.zhang.util.NettyHttpResponseFutureUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpContent;
@@ -26,16 +28,13 @@ import io.netty.handler.timeout.IdleStateEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.zhang.pool.NettyChannelPool;
-import com.zhang.util.NettyHttpResponseFutureUtil;
-
 /**
  * @author xianwu.zhang
  */
 public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObject> {
     private static final Logger logger = Logger.getLogger(NettyChannelPoolHandler.class.getName());
 
-    private NettyChannelPool    channelPool;
+    private NettyChannelPool channelPool;
 
     /**
      * @param channelPool
@@ -56,7 +55,7 @@ public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObj
             NettyHttpResponseFutureUtil.setPendingContent(ctx.channel(), httpContent);
             if (httpContent instanceof LastHttpContent) {
                 boolean connectionClose = NettyHttpResponseFutureUtil
-                    .headerContainConnectionClose(ctx.channel());
+                        .headerContainConnectionClose(ctx.channel());
 
                 NettyHttpResponseFutureUtil.done(ctx.channel());
                 //the maxKeepAliveRequests config will cause server close the channel, and return 'Connection: close' in headers                
@@ -81,8 +80,7 @@ public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObj
     }
 
     /**
-     * @param channelPool
-     *            the channelPool to set
+     * @param channelPool the channelPool to set
      */
     public void setChannelPool(NettyChannelPool channelPool) {
         this.channelPool = channelPool;

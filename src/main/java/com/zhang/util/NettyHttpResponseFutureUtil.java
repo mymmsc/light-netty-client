@@ -15,6 +15,7 @@
  */
 package com.zhang.util;
 
+import com.zhang.client.NettyHttpResponseFuture;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -23,21 +24,19 @@ import io.netty.util.AttributeKey;
 
 import java.net.InetSocketAddress;
 
-import com.zhang.client.NettyHttpResponseFuture;
-
 /**
  * @author xianwu.zhang
  */
 public class NettyHttpResponseFutureUtil {
 
-    private static final AttributeKey<Object> DEFAULT_ATTRIBUTE       = AttributeKey
-                                                                          .valueOf("nettyHttpResponse");
+    private static final AttributeKey<Object> DEFAULT_ATTRIBUTE = AttributeKey
+            .valueOf("nettyHttpResponse");
 
-    private static final AttributeKey<Object> ROUTE_ATTRIBUTE         = AttributeKey
-                                                                          .valueOf("route");
+    private static final AttributeKey<Object> ROUTE_ATTRIBUTE = AttributeKey
+            .valueOf("route");
 
     private static final AttributeKey<Object> FORCE_CONNECT_ATTRIBUTE = AttributeKey
-                                                                          .valueOf("forceConnect");
+            .valueOf("forceConnect");
 
     public static void attributeForceConnect(Channel channel, boolean forceConnect) {
         if (forceConnect) {
@@ -81,7 +80,7 @@ public class NettyHttpResponseFutureUtil {
     public static boolean headerContainConnectionClose(Channel channel) {
         NettyHttpResponseFuture responseFuture = getResponse(channel);
         return HttpHeaders.Values.CLOSE.equalsIgnoreCase(responseFuture.getResponseBuilder()
-            .getPendingResponse().headers().get(HttpHeaders.Names.CONNECTION));
+                .getPendingResponse().headers().get(HttpHeaders.Names.CONNECTION));
     }
 
     public static void setPendingContent(Channel channel, HttpContent httpContent) {

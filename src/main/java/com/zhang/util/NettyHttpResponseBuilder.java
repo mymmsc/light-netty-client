@@ -15,6 +15,7 @@
  */
 package com.zhang.util;
 
+import com.zhang.client.NettyHttpResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponse;
 
@@ -22,24 +23,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.zhang.client.NettyHttpResponse;
-
 /**
  * @author xianwu.zhang
  */
 public class NettyHttpResponseBuilder {
 
-    private volatile HttpResponse      pendingResponse;
+    private volatile HttpResponse pendingResponse;
 
-    private volatile List<ByteBuf>     pendingContents;
+    private volatile List<ByteBuf> pendingContents;
 
-    private volatile Throwable         cause;
+    private volatile Throwable cause;
 
     private volatile NettyHttpResponse content;
 
-    private AtomicBoolean              isBuild = new AtomicBoolean(false);
+    private AtomicBoolean isBuild = new AtomicBoolean(false);
 
-    private volatile boolean           success = false;
+    private volatile boolean success = false;
 
     public NettyHttpResponse build() {
         if (isBuild.getAndSet(true)) {
@@ -76,7 +75,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Getter method for property <tt>pendingResponse</tt>.
-     * 
+     *
      * @return property value of pendingResponse
      */
     public HttpResponse getPendingResponse() {
@@ -85,7 +84,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Setter method for property <tt>pendingResponse</tt>.
-     * 
+     *
      * @param pendingResponse value to be assigned to property pendingResponse
      */
     public void setPendingResponse(HttpResponse pendingResponse) {
@@ -94,7 +93,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Getter method for property <tt>pendingContents</tt>.
-     * 
+     *
      * @return property value of pendingContents
      */
     public List<ByteBuf> getPendingContents() {
@@ -103,7 +102,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Setter method for property <tt>pendingContents</tt>.
-     * 
+     *
      * @param pendingContents value to be assigned to property pendingContents
      */
     public void setPendingContents(List<ByteBuf> pendingContents) {
@@ -112,7 +111,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Getter method for property <tt>cause</tt>.
-     * 
+     *
      * @return property value of cause
      */
     public Throwable getCause() {
@@ -121,7 +120,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Setter method for property <tt>cause</tt>.
-     * 
+     *
      * @param cause value to be assigned to property cause
      */
     public void setCause(Throwable cause) {
@@ -130,7 +129,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Getter method for property <tt>success</tt>.
-     * 
+     *
      * @return property value of success
      */
     public boolean isSuccess() {
@@ -139,7 +138,7 @@ public class NettyHttpResponseBuilder {
 
     /**
      * Setter method for property <tt>success</tt>.
-     * 
+     *
      * @param success value to be assigned to property success
      */
     public void setSuccess(boolean success) {

@@ -15,6 +15,9 @@
  */
 package com.zhang.client;
 
+import com.zhang.handler.AdditionalChannelInitializer;
+import com.zhang.pool.NettyChannelPool;
+import com.zhang.util.NettyHttpRequestUtil;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.http.HttpMethod;
@@ -24,10 +27,6 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.zhang.handler.AdditionalChannelInitializer;
-import com.zhang.pool.NettyChannelPool;
-import com.zhang.util.NettyHttpRequestUtil;
-
 /**
  * @author xianwu.zhang
  */
@@ -35,21 +34,21 @@ public class NettyHttpClient {
 
     private NettyChannelPool channelPool;
 
-    private ConfigBuilder    configBuilder;
+    private ConfigBuilder configBuilder;
 
     private NettyHttpClient(ConfigBuilder configBuilder) {
         this.configBuilder = configBuilder;
         this.channelPool = new NettyChannelPool(configBuilder.getMaxPerRoute(), configBuilder
-            .getConnectTimeOutInMilliSecondes(), configBuilder.getMaxIdleTimeInMilliSecondes(),
-            configBuilder.getForbidForceConnect(), configBuilder.getAdditionalChannelInitializer(),
-            configBuilder.getOptions(), configBuilder.getGroup());
+                .getConnectTimeOutInMilliSecondes(), configBuilder.getMaxIdleTimeInMilliSecondes(),
+                configBuilder.getForbidForceConnect(), configBuilder.getAdditionalChannelInitializer(),
+                configBuilder.getOptions(), configBuilder.getGroup());
     }
 
     public NettyHttpResponseFuture doPost(NettyHttpRequest request) throws Exception {
 
         HttpRequest httpRequest = NettyHttpRequestUtil.create(request, HttpMethod.POST);
         InetSocketAddress route = new InetSocketAddress(request.getUri().getHost(), request
-            .getUri().getPort());
+                .getUri().getPort());
 
         return channelPool.sendRequest(route, httpRequest);
     }
@@ -57,7 +56,7 @@ public class NettyHttpClient {
     public NettyHttpResponseFuture doGet(NettyHttpRequest request) throws Exception {
         HttpRequest httpRequest = NettyHttpRequestUtil.create(request, HttpMethod.GET);
         InetSocketAddress route = new InetSocketAddress(request.getUri().getHost(), request
-            .getUri().getPort());
+                .getUri().getPort());
         return channelPool.sendRequest(route, httpRequest);
     }
 
@@ -75,13 +74,13 @@ public class NettyHttpClient {
 
     public static final class ConfigBuilder {
         @SuppressWarnings("unchecked")
-        private Map<ChannelOption, Object>   options            = new HashMap<ChannelOption, Object>();
+        private Map<ChannelOption, Object> options = new HashMap<ChannelOption, Object>();
 
         // max idle time for a channel before close
-        private int                          maxIdleTimeInMilliSecondes;
+        private int maxIdleTimeInMilliSecondes;
 
         // max time wait for a channel return from pool
-        private int                          connectTimeOutInMilliSecondes;
+        private int connectTimeOutInMilliSecondes;
 
         /**
          * value is false indicates that when there is not any channel in pool and no new
@@ -89,14 +88,14 @@ public class NettyHttpClient {
          * to create.Otherwise, a <code>TimeoutException</code> will be thrown
          * value is false.
          */
-        private boolean                      forbidForceConnect = false;
+        private boolean forbidForceConnect = false;
 
         private AdditionalChannelInitializer additionalChannelInitializer;
 
         // max number of channels allow to be created per route
-        private Map<String, Integer>         maxPerRoute;
+        private Map<String, Integer> maxPerRoute;
 
-        private EventLoopGroup               customGroup;
+        private EventLoopGroup customGroup;
 
         public ConfigBuilder() {
         }
@@ -127,7 +126,7 @@ public class NettyHttpClient {
         }
 
         public ConfigBuilder additionalChannelInitializer(
-                                                          AdditionalChannelInitializer additionalChannelInitializer) {
+                AdditionalChannelInitializer additionalChannelInitializer) {
             this.additionalChannelInitializer = additionalChannelInitializer;
             return this;
         }

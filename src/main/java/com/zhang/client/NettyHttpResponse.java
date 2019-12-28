@@ -15,25 +15,25 @@
  */
 package com.zhang.client;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author xianwu.zhang
  */
 public class NettyHttpResponse {
-    private volatile boolean            success = false;
+    private volatile boolean success = false;
     private volatile HttpResponseStatus status;
-    private volatile HttpVersion        version;
-    private volatile HttpHeaders        headers;
-    private volatile List<ByteBuf>      contents;
-    private volatile Throwable          cause;
+    private volatile HttpVersion version;
+    private volatile HttpHeaders headers;
+    private volatile List<ByteBuf> contents;
+    private volatile Throwable cause;
 
     public NettyHttpResponse() {
         super();
@@ -70,8 +70,7 @@ public class NettyHttpResponse {
     }
 
     /**
-     * @param version
-     *            the version to set
+     * @param version the version to set
      */
     public void setVersion(HttpVersion version) {
         this.version = version;
@@ -121,7 +120,7 @@ public class NettyHttpResponse {
 
     /**
      * Getter method for property <tt>success</tt>.
-     * 
+     *
      * @return property value of success
      */
     public boolean isSuccess() {
@@ -130,7 +129,7 @@ public class NettyHttpResponse {
 
     /**
      * Setter method for property <tt>success</tt>.
-     * 
+     *
      * @param success value to be assigned to property success
      */
     public void setSuccess(boolean success) {
@@ -139,7 +138,7 @@ public class NettyHttpResponse {
 
     /**
      * Getter method for property <tt>cause</tt>.
-     * 
+     *
      * @return property value of cause
      */
     public Throwable getCause() {
@@ -148,7 +147,7 @@ public class NettyHttpResponse {
 
     /**
      * Setter method for property <tt>cause</tt>.
-     * 
+     *
      * @param cause value to be assigned to property cause
      */
     public void setCause(Throwable cause) {

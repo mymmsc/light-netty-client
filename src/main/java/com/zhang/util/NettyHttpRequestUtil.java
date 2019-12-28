@@ -15,6 +15,7 @@
  */
 package com.zhang.util;
 
+import com.zhang.client.NettyHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -22,8 +23,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 
 import java.util.Map.Entry;
-
-import com.zhang.client.NettyHttpRequest;
 
 /**
  * @author xianwu.zhang
@@ -34,13 +33,13 @@ public class NettyHttpRequestUtil {
         HttpRequest httpRequest = null;
         if (HttpMethod.POST == httpMethod) {
             httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, request
-                .getUri().getRawPath(), request.getContent().retain());
+                    .getUri().getRawPath(), request.getContent().retain());
 
             httpRequest.headers().set(HttpHeaders.Names.CONTENT_LENGTH,
-                request.getContent().readableBytes());
+                    request.getContent().readableBytes());
         } else {
             httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, request
-                .getUri().getRawPath());
+                    .getUri().getRawPath());
         }
         for (Entry<String, Object> entry : request.getHeaders().entrySet()) {
             httpRequest.headers().set(entry.getKey(), entry.getValue());

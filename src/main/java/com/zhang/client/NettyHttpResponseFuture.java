@@ -15,6 +15,7 @@
  */
 package com.zhang.client;
 
+import com.zhang.util.NettyHttpResponseBuilder;
 import io.netty.channel.Channel;
 
 import java.util.concurrent.CountDownLatch;
@@ -23,23 +24,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.zhang.util.NettyHttpResponseBuilder;
-
 /**
  * @author xianwu.zhang
  */
 public class NettyHttpResponseFuture {
-    private final CountDownLatch              latch       = new CountDownLatch(1);
+    private final CountDownLatch latch = new CountDownLatch(1);
 
-    private volatile boolean                  isDone      = false;
+    private volatile boolean isDone = false;
 
-    private volatile boolean                  isCancel    = false;
+    private volatile boolean isCancel = false;
 
-    private final AtomicBoolean               isProcessed = new AtomicBoolean(false);
+    private final AtomicBoolean isProcessed = new AtomicBoolean(false);
 
     private volatile NettyHttpResponseBuilder responseBuilder;
 
-    private volatile Channel                  channel;
+    private volatile Channel channel;
 
     public boolean cancel(Throwable cause) {
         if (isProcessed.getAndSet(true)) {
@@ -60,7 +59,7 @@ public class NettyHttpResponseFuture {
     }
 
     public NettyHttpResponse get(long timeout, TimeUnit unit) throws TimeoutException,
-                                                             InterruptedException {
+            InterruptedException {
         if (!latch.await(timeout, unit)) {
             throw new TimeoutException();
         }
@@ -86,7 +85,7 @@ public class NettyHttpResponseFuture {
 
     /**
      * Getter method for property <tt>channel</tt>.
-     * 
+     *
      * @return property value of channel
      */
     public Channel getChannel() {
@@ -95,7 +94,7 @@ public class NettyHttpResponseFuture {
 
     /**
      * Setter method for property <tt>channel</tt>.
-     * 
+     *
      * @param channel value to be assigned to property channel
      */
     public void setChannel(Channel channel) {
@@ -104,7 +103,7 @@ public class NettyHttpResponseFuture {
 
     /**
      * Getter method for property <tt>responseBuilder</tt>.
-     * 
+     *
      * @return property value of responseBuilder
      */
     public NettyHttpResponseBuilder getResponseBuilder() {
@@ -113,7 +112,7 @@ public class NettyHttpResponseFuture {
 
     /**
      * Setter method for property <tt>responseBuilder</tt>.
-     * 
+     *
      * @param responseBuilder value to be assigned to property responseBuilder
      */
     public void setResponseBuilder(NettyHttpResponseBuilder responseBuilder) {
