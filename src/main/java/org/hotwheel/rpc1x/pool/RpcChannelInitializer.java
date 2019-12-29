@@ -1,7 +1,6 @@
 package org.hotwheel.rpc1x.pool;
 
 import io.netty.channel.ChannelPipeline;
-import org.hotwheel.rpc1x.pool.RpcChannelPool;
 
 public interface RpcChannelInitializer {
 
