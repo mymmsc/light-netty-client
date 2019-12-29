@@ -1,4 +1,4 @@
-package org.hotwheel.rpc1x.handler;
+package org.hotwheel.rpc1x.protocol.http;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

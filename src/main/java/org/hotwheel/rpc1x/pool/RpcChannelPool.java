@@ -17,7 +17,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.hotwheel.rpc1x.core.CompileOptions;
 import org.hotwheel.rpc1x.core.RpcFuture;
-import org.hotwheel.rpc1x.handler.RpcChannelInitializer;
 
 import java.net.InetSocketAddress;
 import java.util.Map;

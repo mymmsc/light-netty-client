@@ -2,7 +2,7 @@ package org.hotwheel.rpc1x.core;
 
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import org.hotwheel.rpc1x.handler.RpcChannelInitializer;
+import org.hotwheel.rpc1x.pool.RpcChannelInitializer;
 
 import java.util.HashMap;
 import java.util.Map;

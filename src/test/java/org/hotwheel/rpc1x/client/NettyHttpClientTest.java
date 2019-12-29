@@ -21,8 +21,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import org.hotwheel.rpc1x.core.ClientConfig;
 import org.hotwheel.rpc1x.core.ResponseBuilder;
 import org.hotwheel.rpc1x.core.RpcFuture;
-import org.hotwheel.rpc1x.handler.RpcChannelInitializer;
-import org.hotwheel.rpc1x.handler.HttpChannelPoolHandler;
+import org.hotwheel.rpc1x.pool.RpcChannelInitializer;
+import org.hotwheel.rpc1x.protocol.http.HttpChannelPoolHandler;
 import org.hotwheel.rpc1x.pool.RpcChannelPool;
 import org.hotwheel.rpc1x.protocol.http.HttpAdapter;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
@@ -38,7 +38,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NettyClientTest {
+public class NettyHttpClientTest {
     private ClientConfig config;
 
     @Before

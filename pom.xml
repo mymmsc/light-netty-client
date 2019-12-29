@@ -9,11 +9,6 @@
 	<packaging>jar</packaging>
 	<version>0.1.0</version>
 
-	<properties>
-		<java.encoding>UTF-8</java.encoding>
-		<jdk.version>1.8</jdk.version>
-	</properties>
-
 	<developers>
 		<developer>
 			<id>jason</id>
@@ -27,6 +22,26 @@
 		</developer>
 	</developers>
 
+	<properties>
+		<java.encoding>UTF-8</java.encoding>
+		<jdk.version>1.8</jdk.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.1.39.Final</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -69,21 +84,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
-	<dependencies>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-			<version>4.1.39.Final</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>
