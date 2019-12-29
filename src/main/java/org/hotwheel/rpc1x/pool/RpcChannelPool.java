@@ -16,7 +16,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.hotwheel.rpc1x.core.CompileOptions;
-import org.hotwheel.rpc1x.core.RpcFuture;
+import org.hotwheel.rpc1x.core.RpcResponseFuture;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -119,7 +119,7 @@ public class RpcChannelPool {
      * @param channel
      */
     public void returnChannel(Channel channel) {
-        if (RpcFuture.getForceConnect(channel)) {
+        if (RpcResponseFuture.getForceConnect(channel)) {
             return;
         }
         InetSocketAddress route = (InetSocketAddress) channel.remoteAddress();
@@ -162,9 +162,9 @@ public class RpcChannelPool {
         InetSocketAddress route = (InetSocketAddress) channel.remoteAddress();
         String key = getKey(route);
 
-        RpcFuture.cancel(channel, cause);
+        RpcResponseFuture.cancel(channel, cause);
 
-        if (!RpcFuture.getForceConnect(channel)) {
+        if (!RpcResponseFuture.getForceConnect(channel)) {
             LinkedBlockingQueue<Channel> poolChannels = routeToPoolChannels.get(key);
             if (poolChannels.remove(channel)) {
                 logger.log(Level.INFO, channel + " removed");
@@ -174,7 +174,7 @@ public class RpcChannelPool {
     }
 
     public void releaseCreatePerRoute(Channel channel) {
-        InetSocketAddress route = RpcFuture.getRoute(channel);
+        InetSocketAddress route = RpcResponseFuture.getRoute(channel);
         getAllowCreatePerRoute(getKey(route)).release();
     }
 
@@ -223,7 +223,7 @@ public class RpcChannelPool {
         if (forceConnect) {
             ChannelFuture connectFuture = clientBootstrap.connect(route.getHostName(), route.getPort());
             if (null != connectFuture) {
-                RpcFuture.attributeForceConnect(connectFuture.channel(), forceConnect);
+                RpcResponseFuture.attributeForceConnect(connectFuture.channel(), forceConnect);
             }
             return connectFuture;
         }

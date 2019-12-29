@@ -7,10 +7,8 @@ import org.hotwheel.rpc1x.core.ResponseBuilder;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class NettyHttpResponseBuilder<T> extends ResponseBuilder<NettyHttpResponse> {
-
+public class NettyHttpResponseBuilder extends ResponseBuilder<NettyHttpResponse> {
     private volatile NettyHttpResponse content;
-
     private AtomicBoolean isBuild = new AtomicBoolean(false);
 
     @Override
@@ -20,9 +18,7 @@ public class NettyHttpResponseBuilder<T> extends ResponseBuilder<NettyHttpRespon
         }
         NettyHttpResponse response = new NettyHttpResponse();
         content = response;
-
         if (isSuccess()) {
-
             HttpResponse pendingResponse = getPendingResponse();
             List<ByteBuf> pendingContents = getContents();
             response.setSuccess(true);

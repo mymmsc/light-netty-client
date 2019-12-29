@@ -20,7 +20,7 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import org.hotwheel.rpc1x.core.ClientConfig;
 import org.hotwheel.rpc1x.core.ResponseBuilder;
-import org.hotwheel.rpc1x.core.RpcFuture;
+import org.hotwheel.rpc1x.core.RpcResponseFuture;
 import org.hotwheel.rpc1x.pool.RpcChannelInitializer;
 import org.hotwheel.rpc1x.protocol.http.HttpChannelPoolHandler;
 import org.hotwheel.rpc1x.pool.RpcChannelPool;
@@ -56,14 +56,7 @@ public class NettyHttpClientTest {
 
     @Test
     public void testGet() throws Exception {
-        final String url = "http://www.baidu.com:80";
-        ResponseBuilder<NettyHttpResponse> responseBuilder = new ResponseBuilder<NettyHttpResponse>() {
-            @Override
-            public NettyHttpResponse build() {
-                return new NettyHttpResponse();
-            }
-        };
-
+        final String url = "http://www.baidu.com/abc.cgi";
         RpcChannelInitializer initializer = new RpcChannelInitializer() {
             @Override
             public void init(ChannelPipeline pipeline, RpcChannelPool rpcChannelPool) throws Exception {
@@ -78,7 +71,7 @@ public class NettyHttpClientTest {
         final NettyHttpRequest request = new NettyHttpRequest();
         request.header(HttpHeaders.Names.CONTENT_TYPE, "text/json; charset=GBK").uri(url);
 
-        RpcFuture<NettyHttpResponse> responseFuture = client.doGet(request);
+        RpcResponseFuture<NettyHttpResponse> responseFuture = client.doGet(request);
 
         NettyHttpResponse response = responseFuture.get();
         client.close();

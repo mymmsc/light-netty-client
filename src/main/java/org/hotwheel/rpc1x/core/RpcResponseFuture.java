@@ -1,11 +1,8 @@
 package org.hotwheel.rpc1x.core;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.AttributeKey;
-import org.hotwheel.rpc1x.protocol.http.NettyHttpResponseBuilder;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
@@ -20,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author wangfeng
  * @date 2019-12-27
  */
-public class RpcFuture<T extends RpcResponse>/* implements Future<T>*/ {
+public class RpcResponseFuture<T extends RpcResponse> {
     public static final AttributeKey<Object> DEFAULT_ATTRIBUTE = AttributeKey.valueOf("nettyResponse");
     public static final AttributeKey<Object> ROUTE_ATTRIBUTE = AttributeKey.valueOf("route");
     public static final AttributeKey<Object> FORCE_CONNECT_ATTRIBUTE = AttributeKey.valueOf("forceConnect");
@@ -36,7 +33,7 @@ public class RpcFuture<T extends RpcResponse>/* implements Future<T>*/ {
         if (isProcessed.getAndSet(true)) {
             return false;
         }
-        responseBuilder = new NettyHttpResponseBuilder();
+        //responseBuilder = new NettyHttpResponseBuilder();
         responseBuilder.setSuccess(false);
         responseBuilder.setCause(cause);
         isCancel = true;
@@ -100,11 +97,11 @@ public class RpcFuture<T extends RpcResponse>/* implements Future<T>*/ {
     }
 
     public static InetSocketAddress getRoute(Channel channel) {
-        return (InetSocketAddress) channel.attr(RpcFuture.ROUTE_ATTRIBUTE).get();
+        return (InetSocketAddress) channel.attr(RpcResponseFuture.ROUTE_ATTRIBUTE).get();
     }
 
     public static boolean getForceConnect(Channel channel) {
-        Object forceConnect = channel.attr(RpcFuture.FORCE_CONNECT_ATTRIBUTE).get();
+        Object forceConnect = channel.attr(RpcResponseFuture.FORCE_CONNECT_ATTRIBUTE).get();
         if (null == forceConnect) {
             return false;
         }
@@ -112,47 +109,33 @@ public class RpcFuture<T extends RpcResponse>/* implements Future<T>*/ {
     }
 
 
-    public static void attributeResponse(Channel channel, RpcFuture responseFuture) {
-        channel.attr(RpcFuture.DEFAULT_ATTRIBUTE).set(responseFuture);
+    public static void attributeResponse(Channel channel, RpcResponseFuture responseFuture) {
+        channel.attr(RpcResponseFuture.DEFAULT_ATTRIBUTE).set(responseFuture);
         responseFuture.setChannel(channel);
     }
 
-    public static RpcFuture getResponse(Channel channel) {
-        return (RpcFuture) channel.attr(RpcFuture.DEFAULT_ATTRIBUTE).get();
+    public static RpcResponseFuture getResponse(Channel channel) {
+        return (RpcResponseFuture) channel.attr(RpcResponseFuture.DEFAULT_ATTRIBUTE).get();
     }
 
     public static void attributeRoute(Channel channel, InetSocketAddress route) {
-        channel.attr(RpcFuture.ROUTE_ATTRIBUTE).set(route);
+        channel.attr(RpcResponseFuture.ROUTE_ATTRIBUTE).set(route);
     }
 
     public static void attributeForceConnect(Channel channel, boolean forceConnect) {
         if (forceConnect) {
-            channel.attr(RpcFuture.FORCE_CONNECT_ATTRIBUTE).set(true);
+            channel.attr(RpcResponseFuture.FORCE_CONNECT_ATTRIBUTE).set(true);
         }
     }
 
-    public static void setPendingResponse(Channel channel, HttpResponse pendingResponse) {
-        RpcFuture responseFuture = getResponse(channel);
-        NettyHttpResponseBuilder responseBuilder = new NettyHttpResponseBuilder();
-        responseBuilder.setSuccess(true);
-        responseBuilder.setPendingResponse(pendingResponse);
-        responseFuture.setResponseBuilder(responseBuilder);
-    }
-
-    public static boolean headerContainConnectionClose(Channel channel) {
-        RpcFuture responseFuture = getResponse(channel);
-        return HttpHeaders.Values.CLOSE.equalsIgnoreCase(responseFuture.getResponseBuilder()
-                .getPendingResponse().headers().get(HttpHeaders.Names.CONNECTION));
-    }
-
-    public static void setPendingContent(Channel channel, HttpContent httpContent) {
-        RpcFuture responseFuture = getResponse(channel);
+    public static void setPendingContent(Channel channel, ByteBuf data) {
+        RpcResponseFuture responseFuture = getResponse(channel);
         ResponseBuilder responseBuilder = responseFuture.getResponseBuilder();
-        responseBuilder.addContent(httpContent.content().retain());
+        responseBuilder.addContent(data);
     }
 
     public static boolean done(Channel channel) {
-        RpcFuture responseFuture = getResponse(channel);
+        RpcResponseFuture responseFuture = getResponse(channel);
         if (null != responseFuture) {
             return responseFuture.done();
         }
@@ -161,7 +144,7 @@ public class RpcFuture<T extends RpcResponse>/* implements Future<T>*/ {
     }
 
     public static boolean cancel(Channel channel, Throwable cause) {
-        RpcFuture responseFuture = getResponse(channel);
+        RpcResponseFuture responseFuture = getResponse(channel);
         return responseFuture.cancel(cause);
     }
 }
