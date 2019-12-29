@@ -3,15 +3,14 @@ package org.hotwheel.rpc1x.client;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
 import org.hotwheel.rpc1x.core.ClientConfig;
 import org.hotwheel.rpc1x.core.RpcClient;
-import org.hotwheel.rpc1x.core.RpcResponseFuture;
+import org.hotwheel.rpc1x.core.RpcFuture;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpResponse;
 import org.hotwheel.rpc1x.util.NettyHttpRequestUtil;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
-import org.hotwheel.rpc1x.util.NettyHttpResponseFutureUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -28,7 +27,7 @@ public class NettyHttpClient extends RpcClient {
         super(clientConfig);
     }
 
-    public RpcResponseFuture<NettyHttpResponse> doPost(NettyHttpRequest request) throws Exception {
+    public RpcFuture<NettyHttpResponse> doPost(NettyHttpRequest request) throws Exception {
 
         HttpRequest httpRequest = NettyHttpRequestUtil.create(request, HttpMethod.POST);
         InetSocketAddress route = new InetSocketAddress(request.getUri().getHost(), request.getUri().getPort());
@@ -36,7 +35,7 @@ public class NettyHttpClient extends RpcClient {
         return sendRequest(route, httpRequest);
     }
 
-    public RpcResponseFuture<NettyHttpResponse> doGet(NettyHttpRequest request) throws Exception {
+    public RpcFuture<NettyHttpResponse> doGet(NettyHttpRequest request) throws Exception {
         HttpRequest httpRequest = NettyHttpRequestUtil.create(request, HttpMethod.GET);
         InetSocketAddress route = new InetSocketAddress(request.getUri().getHost(), request.getUri().getPort());
         return sendRequest(route, httpRequest);
@@ -64,10 +63,10 @@ public class NettyHttpClient extends RpcClient {
      * @throws IOException
      * @throws Exception
      */
-    public RpcResponseFuture<NettyHttpResponse> sendRequest(InetSocketAddress route, final HttpRequest request)
+    public RpcFuture<NettyHttpResponse> sendRequest(InetSocketAddress route, final HttpRequest request)
             throws InterruptedException,
             IOException {
-        final RpcResponseFuture<NettyHttpResponse> responseFuture = new RpcResponseFuture<NettyHttpResponse>();
+        final RpcFuture<NettyHttpResponse> responseFuture = new RpcFuture<NettyHttpResponse>();
         if (sendRequestUsePooledChannel(route, request, responseFuture, false)) {
             return responseFuture;
         }
@@ -84,7 +83,7 @@ public class NettyHttpClient extends RpcClient {
     }
 
     private boolean sendRequestUsePooledChannel(InetSocketAddress route, final HttpRequest request,
-                                                RpcResponseFuture<NettyHttpResponse> responseFuture,
+                                                RpcFuture<NettyHttpResponse> responseFuture,
                                                 boolean isWaiting) throws InterruptedException {
         LinkedBlockingQueue<Channel> poolChannels = pool.getPoolChannels(pool.getKey(route));
         Channel channel = poolChannels.poll();
@@ -105,49 +104,42 @@ public class NettyHttpClient extends RpcClient {
         }
 
         LOG.log(Level.INFO, channel + " reuse");
-        NettyHttpResponseFutureUtil.attributeResponse(channel, responseFuture);
-
+        //NettyHttpResponseFutureUtil.attributeResponse(channel, responseFuture);
+        responseFuture.setChannel(channel);
         channel.writeAndFlush(request).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         return true;
     }
 
     private boolean sendRequestUseNewChannel(final InetSocketAddress route,
                                              final HttpRequest request,
-                                             final RpcResponseFuture<NettyHttpResponse> responseFuture,
+                                             final RpcFuture<NettyHttpResponse> responseFuture,
                                              boolean forceConnect) {
         ChannelFuture future = pool.createChannelFuture(route, forceConnect);
         if (null != future) {
-            NettyHttpResponseFutureUtil.attributeResponse(future.channel(), responseFuture);
-            NettyHttpResponseFutureUtil.attributeRoute(future.channel(), route);
-            future.addListener(new ChannelFutureListener() {
+            RpcFuture.attributeResponse(future.channel(), responseFuture);
+            RpcFuture.attributeRoute(future.channel(), route);
 
+            future.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     if (future.isSuccess()) {
 
                         future.channel().closeFuture().addListener(new ChannelFutureListener() {
-
                             @Override
                             public void operationComplete(ChannelFuture future) throws Exception {
-
-                                LOG.log(Level.SEVERE, future.channel() + " closed, exception: "
-                                        + future.cause());
+                                LOG.log(Level.SEVERE, future.channel() + " closed, exception: " + future.cause());
                                 pool.removeChannel(future.channel(), future.cause());
                             }
-
                         });
                         future.channel().writeAndFlush(request).addListener(CLOSE_ON_FAILURE);
                     } else {
-                        LOG.log(Level.SEVERE, future.channel() + " connect failed, exception: "
-                                + future.cause());
-
-                        NettyHttpResponseFutureUtil.cancel(future.channel(), future.cause());
-                        if (!NettyHttpResponseFutureUtil.getForceConnect(future.channel())) {
+                        LOG.log(Level.SEVERE, future.channel() + " connect failed, exception: " + future.cause());
+                        RpcFuture.cancel(future.channel(), future.cause());
+                        if (!RpcFuture.getForceConnect(future.channel())) {
                             pool.releaseCreatePerRoute(future.channel());
                         }
                     }
                 }
-
             });
             return true;
         }

@@ -15,9 +15,16 @@
  */
 package org.hotwheel.rpc1x.client;
 
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import org.hotwheel.rpc1x.core.ClientConfig;
 import org.hotwheel.rpc1x.core.ResponseBuilder;
-import org.hotwheel.rpc1x.core.RpcResponseFuture;
+import org.hotwheel.rpc1x.core.RpcFuture;
+import org.hotwheel.rpc1x.handler.RpcChannelInitializer;
+import org.hotwheel.rpc1x.handler.HttpChannelPoolHandler;
+import org.hotwheel.rpc1x.pool.RpcChannelPool;
+import org.hotwheel.rpc1x.protocol.http.HttpAdapter;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
 import org.hotwheel.rpc1x.protocol.http.NettyHttpResponse;
 import io.netty.buffer.ByteBuf;
@@ -29,7 +36,6 @@ import java.util.Map;
 
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class NettyClientTest {
@@ -40,7 +46,9 @@ public class NettyClientTest {
         Map<String, Integer> maxPerRoute = new HashMap<String, Integer>();
         maxPerRoute.put("www.baidu.com:80", 100);
 
+        HttpAdapter httpAdapter = new HttpAdapter();
         config = new ClientConfig();
+        config.setAdapter(httpAdapter);
         config.maxIdleTimeInMilliSecondes(200 * 1000);
         config.maxPerRoute(maxPerRoute);
         config.connectTimeOutInMilliSecondes(30 * 1000);
@@ -55,12 +63,22 @@ public class NettyClientTest {
                 return new NettyHttpResponse();
             }
         };
+
+        RpcChannelInitializer initializer = new RpcChannelInitializer() {
+            @Override
+            public void init(ChannelPipeline pipeline, RpcChannelPool rpcChannelPool) throws Exception {
+                pipeline.addLast("codec", new HttpClientCodec());
+                pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
+                pipeline.addLast("handler", new HttpChannelPoolHandler(rpcChannelPool));
+            }
+        };
+        config.additionalChannelInitializer(initializer);
         final NettyHttpClient client = new NettyHttpClient(config);
 
         final NettyHttpRequest request = new NettyHttpRequest();
         request.header(HttpHeaders.Names.CONTENT_TYPE, "text/json; charset=GBK").uri(url);
 
-        RpcResponseFuture<NettyHttpResponse> responseFuture = client.doGet(request);
+        RpcFuture<NettyHttpResponse> responseFuture = client.doGet(request);
 
         NettyHttpResponse response = responseFuture.get();
         client.close();

@@ -1,6 +1,6 @@
 package org.hotwheel.rpc1x.core;
 
-import org.hotwheel.rpc1x.pool.NettyChannelPool;
+import org.hotwheel.rpc1x.pool.RpcChannelPool;
 
 import java.util.logging.Logger;
 
@@ -13,13 +13,13 @@ import java.util.logging.Logger;
 public class RpcClient {
     private static final Logger LOG = Logger.getLogger(RpcClient.class.getSimpleName());
     private ClientConfig clientConfig;
-    protected NettyChannelPool pool;
+    protected RpcChannelPool pool;
 
     public RpcClient(ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
-        this.pool = new NettyChannelPool(clientConfig.getMaxPerRoute(), clientConfig
+        this.pool = new RpcChannelPool(clientConfig.getMaxPerRoute(), clientConfig
                 .getConnectTimeOutInMilliSecondes(), clientConfig.getMaxIdleTimeInMilliSecondes(),
-                clientConfig.getForbidForceConnect(), clientConfig.getAdditionalChannelInitializer(),
+                clientConfig.getForbidForceConnect(), clientConfig.getRpcChannelInitializer(),
                 clientConfig.getOptions(), clientConfig.getGroup());
     }
 

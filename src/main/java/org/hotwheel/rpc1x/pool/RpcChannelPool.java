@@ -1,31 +1,24 @@
 package org.hotwheel.rpc1x.pool;
 
-import org.hotwheel.rpc1x.core.RpcResponseFuture;
-import org.hotwheel.rpc1x.handler.AdditionalChannelInitializer;
-import org.hotwheel.rpc1x.handler.HttpChannelPoolHandler;
-import org.hotwheel.rpc1x.protocol.http.NettyHttpResponse;
-import org.hotwheel.rpc1x.core.CompileOptions;
-import org.hotwheel.rpc1x.util.NettyHttpResponseFutureUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.hotwheel.rpc1x.core.CompileOptions;
+import org.hotwheel.rpc1x.core.RpcFuture;
+import org.hotwheel.rpc1x.handler.RpcChannelInitializer;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,26 +27,25 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class NettyChannelPool {
-    private static final Logger logger = Logger.getLogger(NettyChannelPool.class.getName());
+public class RpcChannelPool {
+    private static final Logger logger = Logger.getLogger(RpcChannelPool.class.getName());
+
+    // default max number of channels allow to be created per route
+    private static final int DEFAULT_MAX_PER_ROUTE = 200;
+    private static final String COLON = ":";
 
     // channel pools per route
     private ConcurrentMap<String, LinkedBlockingQueue<Channel>> routeToPoolChannels;
-
     // max number of channels allow to be created per route
     private ConcurrentMap<String, Semaphore> maxPerRoute;
-
     // max time wait for a channel return from pool
     private int connectTimeOutInMilliSecondes;
-
     // max idle time for a channel before close
     private int maxIdleTimeInMilliSecondes;
-
-    private AdditionalChannelInitializer additionalChannelInitializer;
+    private RpcChannelInitializer rpcChannelInitializer;
 
     /**
      * value is false indicates that when there is not any channel in pool and no new
@@ -62,14 +54,8 @@ public class NettyChannelPool {
      */
     public boolean forbidForceConnect;
 
-    // default max number of channels allow to be created per route
-    private final static int DEFAULT_MAX_PER_ROUTE = 200;
-
-    private EventLoopGroup group;
-
     private final Bootstrap clientBootstrap;
-
-    private static final String COLON = ":";
+    private EventLoopGroup group;
 
     /**
      * Create a new instance of ChannelPool
@@ -81,17 +67,17 @@ public class NettyChannelPool {
      *                                      channel allowed to be create based on maxPerRoute, a new channel will be forced
      *                                      to create.Otherwise, a <code>TimeoutException</code> will be thrown. The default
      *                                      value is false.
-     * @param additionalChannelInitializer  user-defined initializer
+     * @param rpcChannelInitializer  user-defined initializer
      * @param options                       user-defined options
      * @param customGroup                   user defined {@link EventLoopGroup}
      */
     @SuppressWarnings(CompileOptions.UNCHECKED)
-    public NettyChannelPool(Map<String, Integer> maxPerRoute, int connectTimeOutInMilliSecondes,
-                            int maxIdleTimeInMilliSecondes, boolean forbidForceConnect,
-                            AdditionalChannelInitializer additionalChannelInitializer,
-                            Map<ChannelOption, Object> options, EventLoopGroup customGroup) {
+    public RpcChannelPool(Map<String, Integer> maxPerRoute, int connectTimeOutInMilliSecondes,
+                          int maxIdleTimeInMilliSecondes, boolean forbidForceConnect,
+                          RpcChannelInitializer rpcChannelInitializer,
+                          Map<ChannelOption, Object> options, EventLoopGroup customGroup) {
 
-        this.additionalChannelInitializer = additionalChannelInitializer;
+        this.rpcChannelInitializer = rpcChannelInitializer;
         this.maxIdleTimeInMilliSecondes = maxIdleTimeInMilliSecondes;
         this.connectTimeOutInMilliSecondes = connectTimeOutInMilliSecondes;
         this.maxPerRoute = new ConcurrentHashMap<String, Semaphore>();
@@ -106,23 +92,12 @@ public class NettyChannelPool {
                 .handler(new ChannelInitializer() {
                     @Override
                     protected void initChannel(Channel ch) throws Exception {
-                        ch.pipeline().addLast("log", new LoggingHandler(LogLevel.INFO));
-
-                        ch.pipeline().addLast(HttpClientCodec.class.getSimpleName(), new HttpClientCodec());
-                        if (null != additionalChannelInitializer) {
-                            additionalChannelInitializer.initChannel(ch);
+                        ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast("log", new LoggingHandler(LogLevel.INFO));
+                        pipeline.addLast("idle", new IdleStateHandler(0, 0, maxIdleTimeInMilliSecondes, TimeUnit.MILLISECONDS));
+                        if (null != rpcChannelInitializer) {
+                            rpcChannelInitializer.init(pipeline, RpcChannelPool.this);
                         }
-
-                        ch.pipeline().addLast(HttpObjectAggregator.class.getSimpleName(),
-                                new HttpObjectAggregator(1048576));
-
-                        ch.pipeline().addLast(
-                                IdleStateHandler.class.getSimpleName(),
-                                new IdleStateHandler(0, 0, maxIdleTimeInMilliSecondes,
-                                        TimeUnit.MILLISECONDS));
-
-                        ch.pipeline().addLast(HttpChannelPoolHandler.class.getSimpleName(),
-                                new HttpChannelPoolHandler(NettyChannelPool.this));
                     }
 
                 });
@@ -137,7 +112,6 @@ public class NettyChannelPool {
                 this.maxPerRoute.put(entry.getKey(), new Semaphore(entry.getValue()));
             }
         }
-
     }
 
     /**
@@ -146,7 +120,7 @@ public class NettyChannelPool {
      * @param channel
      */
     public void returnChannel(Channel channel) {
-        if (NettyHttpResponseFutureUtil.getForceConnect(channel)) {
+        if (RpcFuture.getForceConnect(channel)) {
             return;
         }
         InetSocketAddress route = (InetSocketAddress) channel.remoteAddress();
@@ -189,9 +163,9 @@ public class NettyChannelPool {
         InetSocketAddress route = (InetSocketAddress) channel.remoteAddress();
         String key = getKey(route);
 
-        NettyHttpResponseFutureUtil.cancel(channel, cause);
+        RpcFuture.cancel(channel, cause);
 
-        if (!NettyHttpResponseFutureUtil.getForceConnect(channel)) {
+        if (!RpcFuture.getForceConnect(channel)) {
             LinkedBlockingQueue<Channel> poolChannels = routeToPoolChannels.get(key);
             if (poolChannels.remove(channel)) {
                 logger.log(Level.INFO, channel + " removed");
@@ -201,7 +175,7 @@ public class NettyChannelPool {
     }
 
     public void releaseCreatePerRoute(Channel channel) {
-        InetSocketAddress route = NettyHttpResponseFutureUtil.getRoute(channel);
+        InetSocketAddress route = RpcFuture.getRoute(channel);
         getAllowCreatePerRoute(getKey(route)).release();
     }
 
@@ -250,7 +224,7 @@ public class NettyChannelPool {
         if (forceConnect) {
             ChannelFuture connectFuture = clientBootstrap.connect(route.getHostName(), route.getPort());
             if (null != connectFuture) {
-                NettyHttpResponseFutureUtil.attributeForceConnect(connectFuture.channel(), forceConnect);
+                RpcFuture.attributeForceConnect(connectFuture.channel(), forceConnect);
             }
             return connectFuture;
         }

@@ -1,8 +1,8 @@
 package org.hotwheel.rpc1x.protocol.http;
 
-import org.hotwheel.rpc1x.core.RpcRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.hotwheel.rpc1x.core.RpcRequest;
 
 import java.net.URI;
 import java.nio.charset.Charset;

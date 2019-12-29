@@ -1,11 +1,11 @@
 package org.hotwheel.rpc1x.util;
 
-import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
+import org.hotwheel.rpc1x.protocol.http.NettyHttpRequest;
 
 import java.util.Map.Entry;
 

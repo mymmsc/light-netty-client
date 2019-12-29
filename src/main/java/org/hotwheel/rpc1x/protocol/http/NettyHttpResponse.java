@@ -1,10 +1,10 @@
 package org.hotwheel.rpc1x.protocol.http;
 
-import org.hotwheel.rpc1x.core.RpcResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import org.hotwheel.rpc1x.core.RpcResponse;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
