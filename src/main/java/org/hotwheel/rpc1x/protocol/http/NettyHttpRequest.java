@@ -1,8 +1,8 @@
 package org.hotwheel.rpc1x.protocol.http;
 
-import org.hotwheel.rpc1x.core.RpcRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.hotwheel.rpc1x.core.RpcRequest;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -10,14 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NettyHttpRequest extends RpcRequest {
-
     private URI uri;
-
     private Map<String, Object> headers;
-
     private ByteBuf content;
-
-    private static final Charset DEFAUT_CHARSET = Charset.forName("GBK");
 
     public NettyHttpRequest uri(String uri) {
         this.uri = URI.create(uri);

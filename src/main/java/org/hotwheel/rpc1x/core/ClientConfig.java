@@ -1,9 +1,8 @@
 package org.hotwheel.rpc1x.core;
 
-import org.hotwheel.rpc1x.util.CompileOptions;
-import org.hotwheel.rpc1x.handler.AdditionalChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import org.hotwheel.rpc1x.handler.RpcChannelInitializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,12 +31,13 @@ public final class ClientConfig {
      */
     private boolean forbidForceConnect = false;
 
-    private AdditionalChannelInitializer additionalChannelInitializer;
+    private RpcChannelInitializer rpcChannelInitializer;
 
     // max number of channels allow to be created per route
     private Map<String, Integer> maxPerRoute;
 
     private EventLoopGroup customGroup;
+    private ProtocolAdapter adapter;
 
     public ClientConfig() {
     }
@@ -63,12 +63,6 @@ public final class ClientConfig {
         return this;
     }
 
-    public ClientConfig additionalChannelInitializer(
-            AdditionalChannelInitializer additionalChannelInitializer) {
-        this.additionalChannelInitializer = additionalChannelInitializer;
-        return this;
-    }
-
     public ClientConfig customGroup(EventLoopGroup customGroup) {
         this.customGroup = customGroup;
         return this;
@@ -88,8 +82,13 @@ public final class ClientConfig {
         return maxIdleTimeInMilliSecondes;
     }
 
-    public AdditionalChannelInitializer getAdditionalChannelInitializer() {
-        return additionalChannelInitializer;
+    public ClientConfig additionalChannelInitializer(RpcChannelInitializer rpcChannelInitializer) {
+        this.rpcChannelInitializer = rpcChannelInitializer;
+        return this;
+    }
+
+    public RpcChannelInitializer getRpcChannelInitializer() {
+        return rpcChannelInitializer;
     }
 
     public Map<String, Integer> getMaxPerRoute() {
@@ -106,5 +105,13 @@ public final class ClientConfig {
 
     public boolean getForbidForceConnect() {
         return this.forbidForceConnect;
+    }
+
+    public void setAdapter(ProtocolAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    public ProtocolAdapter getAdapter() {
+        return adapter;
     }
 }

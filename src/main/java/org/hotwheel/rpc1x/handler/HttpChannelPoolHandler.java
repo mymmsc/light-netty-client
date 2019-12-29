@@ -1,7 +1,5 @@
 package org.hotwheel.rpc1x.handler;
 
-import org.hotwheel.rpc1x.pool.NettyChannelPool;
-import org.hotwheel.rpc1x.util.NettyHttpResponseFutureUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpContent;
@@ -9,19 +7,21 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.hotwheel.rpc1x.core.RpcFuture;
+import org.hotwheel.rpc1x.pool.RpcChannelPool;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObject> {
-    private static final Logger logger = Logger.getLogger(NettyChannelPoolHandler.class.getName());
+public class HttpChannelPoolHandler extends SimpleChannelInboundHandler<HttpObject> {
+    private static final Logger logger = Logger.getLogger(HttpChannelPoolHandler.class.getName());
 
-    private NettyChannelPool channelPool;
+    private RpcChannelPool channelPool;
 
     /**
      * @param channelPool
      */
-    public NettyChannelPoolHandler(NettyChannelPool channelPool) {
+    public HttpChannelPoolHandler(RpcChannelPool channelPool) {
         super();
         this.channelPool = channelPool;
     }
@@ -30,15 +30,14 @@ public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObj
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
         if (msg instanceof HttpResponse) {
             HttpResponse headers = (HttpResponse) msg;
-            NettyHttpResponseFutureUtil.setPendingResponse(ctx.channel(), headers);
+            RpcFuture.setPendingResponse(ctx.channel(), headers);
         }
         if (msg instanceof HttpContent) {
             HttpContent httpContent = (HttpContent) msg;
-            NettyHttpResponseFutureUtil.setPendingContent(ctx.channel(), httpContent);
+            RpcFuture.setPendingContent(ctx.channel(), httpContent);
             if (httpContent instanceof LastHttpContent) {
-                boolean connectionClose = NettyHttpResponseFutureUtil.headerContainConnectionClose(ctx.channel());
-
-                NettyHttpResponseFutureUtil.done(ctx.channel());
+                boolean connectionClose = RpcFuture.headerContainConnectionClose(ctx.channel());
+                RpcFuture.done(ctx.channel());
                 //the maxKeepAliveRequests config will cause server close the channel, and return 'Connection: close' in headers                
                 if (!connectionClose) {
                     channelPool.returnChannel(ctx.channel());
@@ -63,7 +62,7 @@ public class NettyChannelPoolHandler extends SimpleChannelInboundHandler<HttpObj
     /**
      * @param channelPool the pool to set
      */
-    public void setChannelPool(NettyChannelPool channelPool) {
+    public void setChannelPool(RpcChannelPool channelPool) {
         this.channelPool = channelPool;
     }
 }
