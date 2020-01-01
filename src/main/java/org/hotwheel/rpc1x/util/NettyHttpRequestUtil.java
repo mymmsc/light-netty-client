@@ -1,6 +1,7 @@
 package org.hotwheel.rpc1x.util;
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -17,7 +18,7 @@ public class NettyHttpRequestUtil {
             httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, request
                     .getUri().getRawPath(), request.getContent().retain());
 
-            httpRequest.headers().set(HttpHeaders.Names.CONTENT_LENGTH,
+            httpRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH,
                     request.getContent().readableBytes());
         } else {
             httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, request
@@ -26,8 +27,8 @@ public class NettyHttpRequestUtil {
         for (Entry<String, Object> entry : request.getHeaders().entrySet()) {
             httpRequest.headers().set(entry.getKey(), entry.getValue());
         }
-        httpRequest.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-        httpRequest.headers().set(HttpHeaders.Names.HOST, request.getUri().getHost());
+        httpRequest.headers().set(HttpHeaderNames.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        httpRequest.headers().set(HttpHeaderNames.HOST, request.getUri().getHost());
 
         return httpRequest;
     }
